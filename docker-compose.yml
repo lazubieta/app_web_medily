@@ -1,0 +1,32 @@
+version: '3.8'
+
+services:
+  mysql:
+    image: mysql:8.0
+    container_name: medily-container
+    restart: always
+    environment:
+      MYSQL_ROOT_PASSWORD: password
+      MYSQL_ROOT_HOST: "%"
+      MYSQL_DATABASE: medily
+      MYSQL_USER: user
+      MYSQL_PASSWORD: user
+    ports:
+      - "3307:3306"
+    volumes:
+      - medily-container:/var/lib/mysql
+      - ./database/medily_backup.sql:/docker-entrypoint-initdb.d/01-medily.sql:ro
+
+  app:
+    build: .
+    container_name: medily-app
+    restart: on-failure
+    depends_on:
+      - mysql
+    environment:
+      SPRING_PROFILES_ACTIVE: mysql
+    ports:
+      - "8080:8080"
+
+volumes:
+  medily-container:
